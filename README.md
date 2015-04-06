@@ -5,8 +5,8 @@ install script
 
 ```
 $ cd /etc/zabbix/alert
-$ curl https://raw.githubusercontent.com/ma3ki/sendimgmail/master/sendimgmail.sh
-$ curl https://raw.githubusercontent.com/ma3ki/sendimgmail/master/sendimgmail.conf
+$ curl -O https://raw.githubusercontent.com/ma3ki/sendimgmail/master/sendimgmail.sh
+$ curl -O https://raw.githubusercontent.com/ma3ki/sendimgmail/master/sendimgmail.conf
 $ chmod 755 sendimgmail.sh
 ```
 
