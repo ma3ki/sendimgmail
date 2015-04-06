@@ -22,7 +22,8 @@ $ sudo yum install mutt
 $ vi sendimgmail.conf
 ```
 
-Setting items
+Setting field and value
+
 |field|value|description|default|
 |---|---|---|---|
 |ZABBIX_URL|String|Zabbix web URL|http://127.0.0.1/zabbix|
