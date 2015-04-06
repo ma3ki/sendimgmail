@@ -31,7 +31,7 @@ Setting field and value
 |ZABBIX_PASS|String|Login password|zabbix|
 |BASIC_USER|String|Basic authentication user|-|
 |BASIC_PASS|String|Basic authentication password|-|
-|MODE|0 or 1|Attachment mode (0=grapgh,1=screen)|0|
+|MODE|0 or 1|Attachment mode (0=graph,1=screen)|0|
 |IMAGE_TEMP|String|Working deirectory|/var/tmp/imgtmp|
 |MAIL_FROM|String|From email address|hogehoge@example.com|
 |MAIL_NAME|String|Display name of the email|zabbix_alert|
