@@ -2,6 +2,7 @@
 #
 # 2014/12/10 v0.01: created by ma3ki@ma3ki.net
 # 2015/04/04 v0.02: add the attached function of the graph of the screen
+# 2015/06/03 v0.03: add -s and -S to the option of the curl command
 #
 # This script has been tested by Zabbix 2.4 on CentOS 7.1 .
 # 
@@ -52,7 +53,7 @@ _zabbix_api() {
 
   case ${method} in
     user.login)
-      jsontemp=$(curl ${AUTH} -X GET -H ${header} -d "{
+      jsontemp=$(curl ${AUTH} -X GET -H ${header} -s -S -d "{
         \"auth\":null,
         \"method\":\"${method}\",
         \"id\":1,
@@ -60,7 +61,7 @@ _zabbix_api() {
           \"user\":\"${ZABBIX_USER}\",
           \"password\":\"${ZABBIX_PASS}\"
         }, \"jsonrpc\":\"2.0\"
-      }" ${ZABBIX_API} 2>/dev/null)
+      }" ${ZABBIX_API} )
 
       result=$(echo "${jsontemp}" | sed -e 's/[,{}]/\n/g' -e 's/"//g' | awk -F: '/^result/{print $2}')
 
@@ -89,14 +90,14 @@ _zabbix_api() {
       done
        
       ### get data
-      jsontemp=$(curl ${AUTH} -X GET -H ${header} -d "{
+      jsontemp=$(curl ${AUTH} -X GET -H ${header} -s -S -d "{
         \"auth\":\"${sid}\",
         \"method\":\"${method}\",
         \"id\":1,
         \"params\":{
           ${output}
         }, \"jsonrpc\":\"2.0\"
-      }" ${ZABBIX_API} 2>/dev/null)
+      }" ${ZABBIX_API})
 
       if [ ${method} = "screen.get" ]
       then
@@ -177,7 +178,7 @@ _get_graph_image() {
 
     if [ ${notupdate} -eq 0 ]
     then
-      curl ${AUTH} -X GET -b zbx_sessionid=${SID} "${ZABBIX_GRAPH}?graphid=${x}&width=${GRAPH_WIDTH}&period=${GRAPH_PERIOD}&stime=${START_TIME}" > ${IMAGE_TEMP}/${x}.png 2>/dev/null
+      curl ${AUTH} -X GET -s -S -b zbx_sessionid=${SID} "${ZABBIX_GRAPH}?graphid=${x}&width=${GRAPH_WIDTH}&period=${GRAPH_PERIOD}&stime=${START_TIME}" > ${IMAGE_TEMP}/${x}.png
       logger -t ${SCRIPT} -p ${PRITEXT} "host=${HOST}, key=${KEY}, stat=Update, image=${IMAGE_TEMP}/${x}.png, size=$(stat --printf=%s ${IMAGE_TEMP}/${x}.png)"
     fi
     mopt=$(echo "${mopt} -a ${IMAGE_TEMP}/${x}.png")
