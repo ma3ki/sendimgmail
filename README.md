@@ -39,6 +39,7 @@ Setting field and value
 |PRITEXT|String|Syslog facility and level|user.info|
 |VERBOSE|0 or 1|Logging mode (0=info,1=debug)|1|
 |PROCESS_LIMIT|integer|Maximum processes|10|
+|CURLOPTS|String|curl options| --silent --show-error|
 
 ## Zabbix Web setting
 
