@@ -4,7 +4,7 @@
 # 2015/04/04 v0.02: add the attached function of the graph of the screen
 # 2015/06/03 v0.03: add -s and -S to the option of the curl command
 # 2015/07/18 v0.04: add CURLOPTS option
-# 2015/08/12 v0.05: add the attached function of the web senario graph
+# 2015/08/12 v0.05: add the attached function of the web senario graph , add pid item on logger
 #
 # This script has been tested by Zabbix 2.4 on CentOS 7.1 .
 #
@@ -27,6 +27,7 @@ source ${CURRENT_PATH}/sendimgmail.conf
 
 ### set SCRIPT NAME
 SCRIPT=$(basename $0)
+PID=$$
 
 ### set basic authentication
 AUTH=""
@@ -175,14 +176,14 @@ _get_graph_image() {
       if [ $(date +%s) -lt $((${modtime} + ${GRAPH_UPDATE_INTERVAL})) ]
       then
         notupdate=1
-        logger -t ${SCRIPT} -p ${PRITEXT} "host=${HOST}, key=${KEY}, stat=Skip, image=${IMAGE_TEMP}/${x}.png, size=$(stat --printf=%s ${IMAGE_TEMP}/${x}.png)"
+        logger -t ${SCRIPT} -p ${PRITEXT} "pid=${PID}, host=${HOST}, key=${KEY}, stat=Skip, image=${IMAGE_TEMP}/${x}.png, size=$(stat --printf=%s ${IMAGE_TEMP}/${x}.png)"
       fi
     fi
 
     if [ ${notupdate} -eq 0 ]
     then
       curl ${CURLOPTS} ${AUTH} -X GET -b zbx_sessionid=${SID} "${ZABBIX_GRAPH}?graphid=${x}&width=${GRAPH_WIDTH}&period=${GRAPH_PERIOD}&stime=${START_TIME}" > ${IMAGE_TEMP}/${x}.png
-      logger -t ${SCRIPT} -p ${PRITEXT} "host=${HOST}, key=${KEY}, stat=Update, image=${IMAGE_TEMP}/${x}.png, size=$(stat --printf=%s ${IMAGE_TEMP}/${x}.png)"
+      logger -t ${SCRIPT} -p ${PRITEXT} "pid=${PID}, host=${HOST}, key=${KEY}, stat=Update, image=${IMAGE_TEMP}/${x}.png, size=$(stat --printf=%s ${IMAGE_TEMP}/${x}.png)"
     fi
     mopt=$(echo "${mopt} -a ${IMAGE_TEMP}/${x}.png")
   done
@@ -204,7 +205,7 @@ _get_web_graph_image() {
     if [ $(date +%s) -lt $((${modtime} + ${GRAPH_UPDATE_INTERVAL})) ]
     then
       notupdate=1
-      logger -t ${SCRIPT} -p ${PRITEXT} "host=${HOST}, key=${KEY}, stat=Skip, image=${IMAGE_TEMP}/${gtype1}.png, size=$(stat --printf=%s ${IMAGE_TEMP}/${gtype1}.png)"
+      logger -t ${SCRIPT} -p ${PRITEXT} "pid=${PID}, host=${HOST}, key=${KEY}, stat=Skip, image=${IMAGE_TEMP}/${gtype1}.png, size=$(stat --printf=%s ${IMAGE_TEMP}/${gtype1}.png)"
       mopt=$(echo "-a ${IMAGE_TEMP}/${gtype1}.png -a ${IMAGE_TEMP}/${gtype2}.png")
     fi
   fi
@@ -215,7 +216,7 @@ _get_web_graph_image() {
     for x in ${gtype1} ${gtype2}
     do
       curl ${CURLOPTS} ${AUTH} -X GET -b zbx_sessionid=${SID} "${ZABBIX_WEB_GRAPH}?httptestid=${hid}&http_item_type=${itype}&period=${GRAPH_PERIOD}&stime=${START_TIME}&ymin_type=1&graphtype=1" > ${IMAGE_TEMP}/${x}.png
-      logger -t ${SCRIPT} -p ${PRITEXT} "host=${HOST}, key=${KEY}, stat=Update, image=${IMAGE_TEMP}/${x}.png, size=$(stat --printf=%s ${IMAGE_TEMP}/${x}.png)"
+      logger -t ${SCRIPT} -p ${PRITEXT} "pid=${PID}, host=${HOST}, key=${KEY}, stat=Update, image=${IMAGE_TEMP}/${x}.png, size=$(stat --printf=%s ${IMAGE_TEMP}/${x}.png)"
       mopt=$(echo "${mopt} -a ${IMAGE_TEMP}/${x}.png")
       itype=$(($itype - 1))
     done
@@ -231,10 +232,10 @@ _result_check() {
 
   if [ "${result}" = "Error" ]
   then
-    logger -t ${SCRIPT} -p ${PRITEXT} "host=${HOST}, key=${KEY}, method=${method}, stat=${result}"
+    logger -t ${SCRIPT} -p ${PRITEXT} "pid=${PID}, host=${HOST}, key=${KEY}, method=${method}, stat=${result}"
   elif [ ${VERBOSE} -eq 1 ]
   then
-    logger -t ${SCRIPT} -p ${PRITEXT} "host=${HOST}, key=${KEY}, method=${method}, id=\"${result}\""
+    logger -t ${SCRIPT} -p ${PRITEXT} "pid=${PID}, host=${HOST}, key=${KEY}, method=${method}, id=\"${result}\""
   fi
 
 }
@@ -255,7 +256,7 @@ then
   mkdir ${IMAGE_TEMP}
   if [ $? -ne 0 ]
   then
-    logger -t ${SCRIPT} -p ${PRITEXT} "host=${HOST}, key=${KEY}, stat=Error, error=\"Can't create ${IMAGE_TEMP}.\""
+    logger -t ${SCRIPT} -p ${PRITEXT} "pid=${PID}, host=${HOST}, key=${KEY}, stat=Error, error=\"Can't create ${IMAGE_TEMP}.\""
     exit 1
   fi
 fi
@@ -277,9 +278,9 @@ then
   result=$(echo "${DATA}" | mutt -s "${SUBJ}" -F ${IMAGE_TEMP}/mutt.txt.$$ "${RCPT}" 2>&1)
   if [ "${result}x" != "x" ]
   then
-    logger -t ${SCRIPT} -p ${PRITEXT} "host=${HOST}, key=${KEY}, stat=Error, error=\"${result}\""
+    logger -t ${SCRIPT} -p ${PRITEXT} "pid=${PID}, host=${HOST}, key=${KEY}, stat=Error, error=\"${result}\""
   fi
-  logger -t ${SCRIPT} -p ${PRITEXT} "host=${HOST}, key=${KEY}, pcnt=${PCNT}, plimit=${PROCESS_LIMIT}"
+  logger -t ${SCRIPT} -p ${PRITEXT} "pid=${PID}, host=${HOST}, key=${KEY}, pcnt=${PCNT}, plimit=${PROCESS_LIMIT}"
   rm -f ${IMAGE_TEMP}/mutt.txt.$$
   exit 1
 fi
@@ -358,9 +359,9 @@ fi
 ### write smtp error log
 if [ "${result}x" != "x" ]
 then
-  logger -t ${SCRIPT} -p ${PRITEXT} "host=${HOST}, key=${KEY}, to=<${RCPT}>, stat=Error, error=\"${result}\""
+  logger -t ${SCRIPT} -p ${PRITEXT} "pid=${PID}, host=${HOST}, key=${KEY}, to=<${RCPT}>, stat=Error, error=\"${result}\""
 else
-  logger -t ${SCRIPT} -p ${PRITEXT} "host=${HOST}, key=${KEY}, to=<${RCPT}>, stat=Sent"
+  logger -t ${SCRIPT} -p ${PRITEXT} "pid=${PID}, host=${HOST}, key=${KEY}, to=<${RCPT}>, stat=Sent"
 fi
 
 ###delete mutt.txt
