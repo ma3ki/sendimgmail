@@ -297,7 +297,7 @@ MOPT=""
 START_TIME=$(date -d "${GRAPH_START}" +%s)
 
 ### if web seinario
-if [ $(echo ${KCMD} | egrep -c "^web.test.(in|fail)$") -eq 1 ]
+if [ $(echo ${KCMD} | egrep -c "^web.test.(in|fail|error|time|rspcode)$") -eq 1 ]
 then
   KNAME=$(echo ${KEY} | awk -F\[ '{print $2}' | sed 's/\]$//' | awk -F, '{print $1}')
   HTTPTESTID=$(_zabbix_api httptest.get ${SID} httptestid '"output":["httptestid"]' "\"filter\":{\"name\":\"${KNAME}\"}")
