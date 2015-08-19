@@ -5,6 +5,7 @@
 # 2015/06/03 v0.03: add -s and -S to the option of the curl command
 # 2015/07/18 v0.04: add CURLOPTS option
 # 2015/08/12 v0.05: add the attached function of the web senario graph , add pid item on logger
+# 2015/08/19 v0.06: fixed) can't get httptestid using same senario name 
 #
 # This script has been tested by Zabbix 2.4 on CentOS 7.1 .
 #
@@ -300,7 +301,7 @@ START_TIME=$(date -d "${GRAPH_START}" +%s)
 if [ $(echo ${KCMD} | egrep -c "^web.test.(in|fail|error|time|rspcode)$") -eq 1 ]
 then
   KNAME=$(echo ${KEY} | awk -F\[ '{print $2}' | sed 's/\]$//' | awk -F, '{print $1}')
-  HTTPTESTID=$(_zabbix_api httptest.get ${SID} httptestid '"output":["httptestid"]' "\"filter\":{\"name\":\"${KNAME}\"}")
+  HTTPTESTID=$(_zabbix_api httptest.get ${SID} httptestid '"output":["httptestid"]' "\"filter\":{\"name\":\"${KNAME}\",\"hostid\":\"${HOSTID}\"}")
   _result_check httptest.get ${HTTPTESTID}
 
   MOPT=$(_get_web_graph_image "${HTTPTESTID}")
